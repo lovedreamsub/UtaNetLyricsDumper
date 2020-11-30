@@ -7,9 +7,11 @@ import locale
 import gettext
 from bs4 import BeautifulSoup
 
+
 def getTable(url):
     req = urllib.request.Request(url)
-    req.add_header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/68.0.3440.84 Safari/537.36")
+    req.add_header("User-Agent",
+                   "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/68.0.3440.84 Safari/537.36")
 
     # Handle errors
     try:
@@ -26,6 +28,7 @@ def getTable(url):
     tab = tables[0]
     return tab
 
+
 def showSongList(tab):
     songID = []
     id = 1
@@ -35,14 +38,15 @@ def showSongList(tab):
     mat = "{:32}\t"
     for tr in tab.findAll('tr'):
         link = tr.findAll('a')[0];
-        print(id, end = '\t')
+        print(id, end='\t')
         id += 1
-        songID.append(re.findall('/song/(.*)/',link.get('href')))
-        print(link.get('href'), end = '\t')
+        songID.append(re.findall('/song/(.*)/', link.get('href')))
+        print(link.get('href'), end='\t')
         for td in tr.findAll('td')[0:2]:
-            print (mat.format(td.getText()), end = ''),
+            print(mat.format(td.getText()), end=''),
         print()
     return songID
+
 
 def dlLyric(songID):
     # Decide which to download
@@ -55,26 +59,27 @@ def dlLyric(songID):
         html = urllib.request.urlopen(url)
         return html.read().decode('utf-8')
 
-    respone = BeautifulSoup(Html(targetURL),"html.parser")
+    respone = BeautifulSoup(Html(targetURL), "html.parser")
     title = respone.find("h2").getText()
-    artist = respone.find("span",itemprop="byArtist name").getText()
-    filetitle=artist+" - "+title
-    text = respone.find("div",id="kashi_area")
-    t = BeautifulSoup(str(text).replace("<br>","\n").replace("<br/>","\n"),"html.parser").getText()
+    artist = respone.find("span", itemprop="byArtist name").getText()
+    filetitle = artist + " - " + title
+    text = respone.find("div", id="kashi_area")
+    t = BeautifulSoup(str(text).replace("<br>", "\n").replace("<br/>", "\n"), "html.parser").getText()
     j = filetitle.find('&#039;')
 
     if j != -1:
-        filetitle = filetitle.replace("&#039;","'")
+        filetitle = filetitle.replace("&#039;", "'")
     else:
         filetitle = filetitle
 
     finalname = re.sub('[/\\\\:*?<>|]', '', filetitle)
     path = sys.path[0]
 
-    lrc = open(finalname+'.txt', 'w', encoding='utf-8')
+    lrc = open(finalname + '.txt', 'w', encoding='utf-8')
     lrc.write(t)
     lrc.close()
     print("LRC file has been ouput to " + path + "\\" + finalname + ".txt")
+
 
 if __name__ == "__main__":
     print("========================================")
